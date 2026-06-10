@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo delle Cose Perdute - Dettaglio Oggetto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-sans text-gray-800">
+
+<header class="bg-white px-[5%] py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 w-full">
+    <a href="/" class="text-xl font-black text-slate-800 tracking-tight">Il Museo delle Cose Perdute</a>
+    <nav class="flex items-center gap-5">
+        <a href="/dashboard.html" class="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">Torna alla Bacheca</a>
+        <a href="/mie_segnalazioni.html" class="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">Le Mie Segnalazioni</a>
+    </nav>
+</header>
+
+<main class="flex-1 flex items-start justify-center p-4 sm:p-8">
+    <div class="bg-white p-6 sm:p-10 rounded-2xl shadow-lg w-full max-w-2xl border border-gray-100 relative">
+
+        <a href="/dashboard.html" class="inline-flex items-center text-blue-600 font-bold hover:text-blue-800 hover:underline mb-8 transition-colors">
+            &larr; Torna alla Bacheca
+        </a>
+
+        <span id="oggettoStato" class="absolute top-6 right-6 sm:top-10 sm:right-10 px-4 py-1.5 rounded-full text-white text-xs font-extrabold uppercase shadow-sm"></span>
+
+        <h2 id="oggettoTitolo" class="text-3xl font-black text-slate-800 mb-8 pr-24 leading-tight">Caricamento...</h2>
+
+        <div class="space-y-3 mb-8">
+            <div class="flex border-b border-gray-100 pb-3">
+                <strong class="w-32 text-slate-700 font-bold">Tipo:</strong>
+                <span id="oggettoTipo" class="text-gray-600"></span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <strong class="w-32 text-slate-700 font-bold">Categoria:</strong>
+                <span id="oggettoCategoria" class="text-gray-600"></span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <strong class="w-32 text-slate-700 font-bold">Luogo:</strong>
+                <span id="oggettoLuogo" class="text-gray-600"></span>
+            </div>
+            <div class="flex border-b border-gray-100 pb-3">
+                <strong class="w-32 text-slate-700 font-bold">Data:</strong>
+                <span id="oggettoData" class="text-gray-600"></span>
+            </div>
+        </div>
+
+        <p class="text-slate-700 font-bold mb-2">Descrizione Oggetto:</p>
+        <div id="oggettoDescrizione" class="bg-gray-50 p-5 rounded-xl border border-gray-200 text-gray-700 leading-relaxed text-sm shadow-inner mb-8"></div>
+
+        <div id="sezAltroSmarrito" class="hidden mt-8 p-6 sm:p-8 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl shadow-sm">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Hai visto questo oggetto?</h3>
+            <p class="text-sm text-gray-600 mb-4">Invia un messaggio al proprietario per aiutarlo. Lo leggerà nella sua bacheca personale.</p>
+            <textarea id="testoContatto" placeholder="Scrivi qui dove o quando credi di aver visto l'oggetto..."
+                      class="w-full px-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm h-24 resize-vertical bg-white"></textarea>
+            <button id="btnInviaMessaggio" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition-colors">
+                Invia Messaggio
+            </button>
+        </div>
+
+        <div id="sezAltroRitrovato" class="hidden mt-8 p-6 sm:p-8 bg-green-50 border-l-4 border-green-500 rounded-r-xl shadow-sm">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Questo oggetto è tuo? Reclamalo!</h3>
+            <p class="text-sm text-gray-600 mb-4">Per evitare truffe, rispondi alla domanda di sicurezza impostata da chi ha trovato l'oggetto:</p>
+            <p id="testoDomandaSegreta" class="font-bold text-green-700 mb-3 bg-green-100/50 p-3 rounded-lg border border-green-200"></p>
+
+            <select id="selectMioSmarrito" class="w-full px-4 py-3 border border-green-200 rounded-lg mb-4 text-sm bg-white">
+                <option value="">-- Seleziona il tuo oggetto smarrito --</option>
+            </select>
+
+            <input type="text" id="rispostaSegreta" placeholder="Inserisci la tua risposta qui..."
+                   class="w-full px-4 py-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all text-sm bg-white">
+            <button id="btnInviaMatch" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition-colors">
+                Invia Proposta di Riscatto
+            </button>
+        </div>
+
+        <div id="sezMioOggetto" class="hidden mt-8 p-6 sm:p-8 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-xl shadow-sm">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Questa è una tua segnalazione</h3>
+            <div id="listaInterazioni" class="space-y-4">
+                <p class="text-gray-500 italic text-sm">Caricamento interazioni...</p>
+            </div>
+        </div>
+
+        <div id="sezChatMatch" class="hidden mt-8 p-6 bg-white border-2 border-green-200 rounded-xl shadow-md flex flex-col h-[400px]">
+            <h3 class="text-lg font-bold text-slate-800 mb-2 border-b border-gray-100 pb-2">Chat Organizzazione Restituzione</h3>
+
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 rounded-lg mb-4 shadow-inner"></div>
+
+            <div class="flex gap-2">
+                <input type="text" id="chatInput" placeholder="Scrivi un messaggio..." class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition-all text-sm bg-white">
+                <button id="btnInviaChat" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-colors">Invia</button>
+                <button id="btnAggiornaChat" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg shadow transition-colors" title="Aggiorna messaggi">🔄</button>
+            </div>
+        </div>
+
+        <div id="messaggio" class="mt-6 text-center font-bold text-sm"></div>
+    </div>
+</main>
+
+<footer class="bg-slate-800 text-slate-400 text-center py-4 text-sm w-full mt-auto">
+    &copy; 2026 Il Museo delle Cose Perdute.
+</footer>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const oggettoId = urlParams.get('id');
+    const idSmarritoUrl = urlParams.get('id_smarrito');
+
+    if (!oggettoId) { window.location.href = '/dashboard.html'; }
+
+    async function caricaDettaglio() {
+        try {
+            const response = await fetch(`/api/segnalazioni/${oggettoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await response.json();
+
+            if (!response.ok) {
+                document.getElementById('oggettoTitolo').innerText = "Errore";
+                document.getElementById('messaggio').innerText = data.errore || "Impossibile caricare l'oggetto";
+                document.getElementById('messaggio').className = "mt-6 text-center font-bold text-sm text-red-500";
+                return;
+            }
+
+            const o = data.oggetto;
+
+            document.getElementById('oggettoTitolo').innerText = o.titolo;
+            document.getElementById('oggettoTipo').innerText = o.tipo.toUpperCase();
+            document.getElementById('oggettoCategoria').innerText = o.categoria;
+            document.getElementById('oggettoLuogo').innerText = o.luogo;
+            document.getElementById('oggettoData').innerText = new Date(o.data_evento).toLocaleDateString('it-IT');
+            document.getElementById('oggettoDescrizione').innerText = o.descrizione;
+
+            const badgeStato = document.getElementById('oggettoStato');
+            badgeStato.innerText = o.stato.replace('_', ' ');
+            badgeStato.className = "absolute top-6 right-6 sm:top-10 sm:right-10 px-4 py-1.5 rounded-full text-white text-xs font-extrabold uppercase shadow-sm";
+            if (o.stato === 'aperta') badgeStato.classList.add('bg-blue-500');
+            else if (o.stato === 'in_verifica') badgeStato.classList.add('bg-yellow-500');
+            else badgeStato.classList.add('bg-green-600');
+
+            if (data.isMio) {
+                document.getElementById('sezMioOggetto').classList.remove('hidden');
+                caricaInterazioniRicevute(o.tipo);
+            } else {
+                if (o.tipo === 'smarrito') {
+                    document.getElementById('sezAltroSmarrito').classList.remove('hidden');
+                } else {
+                    if (o.stato === 'aperta') {
+                        document.getElementById('sezAltroRitrovato').classList.remove('hidden');
+                        document.getElementById('testoDomandaSegreta').innerText = `Domanda: "${o.domanda_verifica}"`;
+
+                        if (idSmarritoUrl) {
+                            const selectEl = document.getElementById('selectMioSmarrito');
+                            selectEl.classList.add('hidden');
+
+                            const infoText = document.createElement('p');
+                            infoText.className = "text-xs font-bold text-blue-600 bg-blue-50 p-2.5 rounded-lg mb-4 border border-blue-100 shadow-sm";
+                            infoText.innerText = "Reclamo avviato tramite match suggerito dal sistema per la tua segnalazione.";
+                            selectEl.parentElement.insertBefore(infoText, selectEl);
+
+                            selectEl.innerHTML = `<option value="${idSmarritoUrl}" selected>Pre-compilato</option>`;
+                        } else {
+                            caricaMieiSmarriti();
+                        }
+                    } else {
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = "mt-8 p-6 bg-gray-100 rounded-xl text-center text-gray-600 font-bold text-sm shadow-inner";
+
+                        if (o.stato === 'risolta') {
+                            msgDiv.innerText = "Questo oggetto è stato risolto! Il proprietario e il ritrovatore si stanno organizzando per la restituzione.";
+                        } else {
+                            if (data.haRichiestoMatch) {
+                                msgDiv.className = "mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl text-center text-blue-700 font-bold text-sm shadow-sm";
+                                msgDiv.innerText = "Hai inviato una richiesta di restituzione per questo oggetto! Attendi che il ritrovatore la verifichi.";
+                            } else {
+                                msgDiv.innerText = "Questo oggetto è attualmente in fase di verifica con un altro utente.";
+                            }
+                        }
+                        document.getElementById('sezAltroRitrovato').parentElement.appendChild(msgDiv);
+                    }
+                }
+            }
+
+            if (o.stato === 'risolta') {
+                inizializzaChat();
+            }
+
+        } catch (error) {
+            document.getElementById('messaggio').innerText = "Errore di connessione.";
+            document.getElementById('messaggio').className = "mt-6 text-center font-bold text-sm text-red-500";
+        }
+    }
+
+    document.getElementById('btnInviaMessaggio')?.addEventListener('click', async () => {
+        const contenuto = document.getElementById('testoContatto').value;
+        const msgDiv = document.getElementById('messaggio');
+        if(!contenuto.trim()) return alert("Scrivi un messaggio prima di inviare!");
+
+        try {
+            const res = await fetch(`/api/messaggi/${oggettoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ contenuto })
+            });
+            const data = await res.json();
+            if(res.ok) {
+                msgDiv.className = "mt-6 text-center font-bold text-sm text-green-600";
+                msgDiv.innerText = "Messaggio inviato! Il proprietario lo leggerà nella sua bacheca.";
+                document.getElementById('testoContatto').value = '';
+            } else {
+                msgDiv.className = "mt-6 text-center font-bold text-sm text-red-500";
+                msgDiv.innerText = data.errore;
+            }
+        } catch (err) {
+            msgDiv.className = "mt-6 text-center font-bold text-sm text-red-500";
+            msgDiv.innerText = "Errore di connessione.";
+        }
+    });
+
+    document.getElementById('btnInviaMatch')?.addEventListener('click', async () => {
+        const idSmarrito = document.getElementById('selectMioSmarrito').value;
+        const risposta = document.getElementById('rispostaSegreta').value;
+        const msgDiv = document.getElementById('messaggio');
+
+        if(!idSmarrito) return alert("Seleziona quale tuo oggetto stai reclamando!");
+        if(!risposta.trim()) return alert("Inserisci una risposta alla domanda!");
+
+        try {
+            const res = await fetch(`/api/match/${oggettoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ id_smarrito: idSmarrito, risposta: risposta })
+            });
+            const data = await res.json();
+            if(res.ok) {
+                msgDiv.className = "mt-6 text-center font-bold text-sm text-green-600";
+                msgDiv.innerText = "Proposta inviata! Il ritrovatore verificherà.";
+                setTimeout(() => { location.reload(); }, 1500);
+            } else {
+                msgDiv.className = "mt-6 text-center font-bold text-sm text-red-500";
+                msgDiv.innerText = data.errore;
+            }
+        } catch (err) {
+            msgDiv.className = "mt-6 text-center font-bold text-sm text-red-500";
+            msgDiv.innerText = "Errore di connessione.";
+        }
+    });
+
+    async function caricaInterazioniRicevute(tipo) {
+        const listaDiv = document.getElementById('listaInterazioni');
+
+        if (tipo === 'smarrito') {
+            listaDiv.innerHTML = `
+                <p class="text-gray-600 italic text-sm mb-4">I messaggi e i match per questo oggetto sono gestiti comodamente nella tua dashboard principale.</p>
+                <a href="/mie_segnalazioni.html" class="inline-block bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-blue-700 transition-colors">Vai a Le Mie Segnalazioni</a>
+            `;
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/match/ricevute/${oggettoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const dati = await res.json();
+            if(!res.ok || dati.length === 0) { listaDiv.innerHTML = '<p class="italic text-gray-500 text-sm">Nessuna proposta di riscatto ricevuta.</p>'; return; }
+
+            listaDiv.innerHTML = '';
+            dati.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 p-5 rounded-xl shadow-sm';
+
+                let bottoniStato = item.stato === 'in_attesa' ? `
+                    <div class="mt-4 flex gap-3">
+                        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors" onclick="gestisciMatch(${item.id}, 'approvato')">Accetta</button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors" onclick="gestisciMatch(${item.id}, 'rifiutato')">Rifiuta</button>
+                    </div>` : (item.stato === 'approvato'
+                    ? `<p class="mt-3 text-sm font-bold uppercase text-green-600">APPROVATO</p>
+                           <p class="text-xs text-green-700 bg-green-50 p-2.5 rounded-lg mt-2 font-semibold border border-green-100 shadow-sm leading-relaxed">
+                                Ottimo! Usa i contatti per vederti dal vivo con il proprietario e ridargli l'oggetto.
+                           </p>`
+                    : `<p class="mt-3 text-sm font-bold uppercase text-red-600">${item.stato}</p>`);
+
+                card.innerHTML = `<p class="text-sm font-bold">Da: ${item.Proponente?.email || 'Utente'}</p><p class="text-sm mt-1 text-gray-700">Risposta data: <span class="italic font-semibold">"${item.risposta_utente}"</span></p>${bottoniStato}`;
+                listaDiv.appendChild(card);
+            });
+        } catch (err) { listaDiv.innerHTML = '<p class="text-red-500 text-sm">Errore caricamento.</p>'; }
+    }
+
+    async function gestisciMatch(matchId, nuovoStato) {
+        const res = await fetch(`/api/match/${matchId}/stato`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ nuovoStato })
+        });
+        if(res.ok) {
+            if (nuovoStato === 'approvato') {
+                alert("Match approvato! Usa la tua pagina 'Le Mie Segnalazioni' per monitorare lo stato.");
+            } else {
+                alert("Proposta rifiutata correttamente.");
+            }
+            location.reload();
+        }
+        else { alert("Errore durante l'aggiornamento dello stato."); }
+    }
+
+    async function caricaMieiSmarriti() {
+        try {
+            const res = await fetch('/api/segnalazioni/utente/mie', { headers: { 'Authorization': `Bearer ${token}` } });
+            const oggetti = await res.json();
+            const select = document.getElementById('selectMioSmarrito');
+            oggetti.filter(o => o.tipo === 'smarrito' && o.stato === 'aperta').forEach(o => {
+                const option = document.createElement('option');
+                option.value = o.id;
+                option.text = o.titolo;
+                select.appendChild(option);
+            });
+        } catch (err) { console.error("Errore caricamento miei smarriti"); }
+    }
+
+    async function inizializzaChat() {
+        try {
+            const res = await fetch(`/api/messaggi/chat/${oggettoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) {
+                document.getElementById('sezChatMatch').classList.remove('hidden');
+                aggiornaMessaggiChat();
+            }
+        } catch (e) { console.error("Chat non disponibile"); }
+    }
+
+    async function aggiornaMessaggiChat() {
+        const container = document.getElementById('chatMessages');
+        try {
+            const res = await fetch(`/api/messaggi/chat/${oggettoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const messaggi = await res.json();
+
+            if (res.ok) {
+                container.innerHTML = '';
+                if(messaggi.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-400 text-xs mt-4">Nessun messaggio. Scrivi per primo!</p>';
+                }
+
+                const myPayload = JSON.parse(atob(token.split('.')[1]));
+                const myUserId = myPayload.id;
+
+                messaggi.forEach(msg => {
+                    const isMio = msg.id_mittente === myUserId;
+                    const allineamento = isMio ? 'justify-end' : 'justify-start';
+                    const coloreBolla = isMio ? 'bg-green-500 text-white' : 'bg-white border border-gray-200 text-gray-800';
+                    const nome = isMio ? 'Tu' : (msg.Mittente?.nome || 'Utente');
+
+                    container.innerHTML += `
+                        <div class="flex ${allineamento}">
+                            <div class="max-w-[75%]">
+                                <p class="text-[10px] text-gray-400 mb-0.5 ml-1">${nome}</p>
+                                <div class="${coloreBolla} p-3 rounded-2xl shadow-sm text-sm">${msg.contenuto}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.scrollTop = container.scrollHeight;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    document.getElementById('btnInviaChat')?.addEventListener('click', async () => {
+        const input = document.getElementById('chatInput');
+        const contenuto = input.value.trim();
+        if (!contenuto) return;
+
+        try {
+            const res = await fetch(`/api/messaggi/chat/${oggettoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ contenuto })
+            });
+            if (res.ok) {
+                input.value = '';
+                aggiornaMessaggiChat();
+            }
+        } catch (e) { console.error(e); }
+    });
+
+    document.getElementById('btnAggiornaChat')?.addEventListener('click', aggiornaMessaggiChat);
+
+    document.getElementById('chatInput')?.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') document.getElementById('btnInviaChat').click();
+    });
+
+    caricaDettaglio();
+</script>
+</body>
+</html>

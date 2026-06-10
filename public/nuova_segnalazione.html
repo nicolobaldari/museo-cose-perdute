@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo delle Cose Perdute - Nuova Segnalazione</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-sans text-gray-800">
+
+<header class="bg-white px-[5%] py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 w-full">
+    <a href="/" class="text-xl font-black text-slate-800 tracking-tight">Il Museo delle Cose Perdute</a>
+    <nav class="flex items-center">
+        <a href="/dashboard.html" class="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">Torna alla Bacheca</a>
+    </nav>
+</header>
+
+<main class="flex-1 flex items-center justify-center p-4 sm:p-8">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg border border-gray-100">
+        <h2 id="titoloPagina" class="text-2xl font-bold text-center text-slate-900 mb-1">Nuova Segnalazione</h2>
+
+        <p id="sottotitoloPagina" class="text-xs text-gray-500 italic text-center mb-6"></p>
+
+        <form id="segnalazioneForm" class="space-y-5">
+            <div>
+                <label for="titolo" class="block text-sm font-semibold text-gray-700 mb-1">Titolo dell'oggetto:</label>
+                <input type="text" id="titolo" placeholder="Es. Mazzo di chiavi, iPhone 13, Portafoglio" required
+                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm">
+            </div>
+
+            <div>
+                <label for="categoria" class="block text-sm font-semibold text-gray-700 mb-1">Categoria:</label>
+                <select id="categoria" required class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-colors text-sm bg-white">
+                    <option value="">Seleziona una categoria...</option>
+                    <option value="Elettronica">Elettronica / Tech (es. Smartphone, PC)</option>
+                    <option value="Abbigliamento">Abbigliamento / Accessori (es. Sciarpe, Giacche)</option>
+                    <option value="Borse">Borse / Zaini</option>
+                    <option value="Documenti">Documenti / Portafogli</option>
+                    <option value="Chiavi">Chiavi</option>
+                    <option value="Occhiali">Occhiali (da vista o da sole)</option>
+                    <option value="Libri">Libri / Appunti / Cancelleria</option>
+                    <option value="Borracce">Borracce / Ombrelli</option>
+                    <option value="Gioielli">Gioielli / Orologi</option>
+                    <option value="Altro">Altro</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="luogo" class="block text-sm font-semibold text-gray-700 mb-1">Luogo dell'evento:</label>
+                <input type="text" id="luogo" placeholder="Es. Aula 3, Biblioteca, Mensa" required
+                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm">
+            </div>
+
+            <div>
+                <label for="data_evento" class="block text-sm font-semibold text-gray-700 mb-1">Data:</label>
+                <input type="date" id="data_evento" max="9999-12-31" required
+                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm text-gray-700">
+            </div>
+
+            <div>
+                <label for="descrizione" class="block text-sm font-semibold text-gray-700 mb-1">Descrizione pubblica dell'oggetto:</label>
+                <textarea id="descrizione" placeholder="Fornisci dettagli utili per riconoscere l'oggetto..." required
+                          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm h-28 resize-vertical"></textarea>
+            </div>
+
+            <div id="sezioneVerifica" class="hidden bg-green-50/60 p-5 rounded-xl border-l-4 border-green-500 space-y-2">
+                <label for="domanda_verifica" class="block text-sm font-bold text-green-700">Domanda di Sicurezza (Campo Segreto):</label>
+                <p class="text-xs text-gray-600 leading-relaxed">Pensa a un dettaglio non visibile o non descritto sopra. Chi reclama l'oggetto dovrà rispondere a questa domanda.</p>
+                <input type="text" id="domanda_verifica" placeholder="Es. Qual è l'immagine dello sfondo?"
+                       class="w-full px-4 py-2.5 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all text-sm bg-white">
+            </div>
+
+            <button type="submit" id="submitBtn"
+                    class="w-full mt-4 text-white font-bold py-3 rounded-lg shadow hover:shadow-md transition-all duration-200">
+                Invia Segnalazione
+            </button>
+        </form>
+
+        <div id="messaggio" class="mt-4 text-center font-bold text-sm"></div>
+    </div>
+</main>
+
+<footer id="footerText" class="bg-slate-800 text-slate-400 text-center py-4 px-4 text-sm w-full mt-auto">
+</footer>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; }
+
+    const oggi = new Date().toISOString().split("T")[0];
+    document.getElementById('data_evento').setAttribute('max', oggi);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipo = urlParams.get('tipo');
+
+    const titoloPagina = document.getElementById('titoloPagina');
+    const sottotitoloPagina = document.getElementById('sottotitoloPagina');
+    const footerText = document.getElementById('footerText');
+    const submitBtn = document.getElementById('submitBtn');
+    const sezioneVerifica = document.getElementById('sezioneVerifica');
+    const domandaInput = document.getElementById('domanda_verifica');
+
+    if (tipo === 'ritrovato') {
+        titoloPagina.innerText = "Segnala un Oggetto Ritrovato";
+        sottotitoloPagina.innerText = "Compila i dettagli qui sotto per aiutare qualcuno a ritrovare il proprio oggetto.";
+        footerText.innerHTML = "&copy; 2026 Il Museo delle Cose Perdute. Grazie per il tuo spirito di collaborazione.";
+        submitBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'shadow-green-100');
+        sezioneVerifica.classList.remove('hidden');
+        domandaInput.required = true;
+    } else if (tipo === 'smarrito') {
+        titoloPagina.innerText = "Segnala un Oggetto Smarrito";
+        sottotitoloPagina.innerText = "Prima di pubblicare controlla meglio: sei veramente sicuro che non sia semplicemente sul fondo del tuo zaino?";
+        footerText.innerHTML = "&copy; 2026 Il Museo delle Cose Perdute. Ti aiutiamo a ritrovare tutto.";
+        submitBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'shadow-orange-100');
+    } else {
+        window.location.href = '/dashboard.html';
+    }
+
+    document.getElementById('segnalazioneForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Inviamo i dati come normale oggetto JSON invece di FormData
+        const payloadData = {
+            tipo: tipo,
+            titolo: document.getElementById('titolo').value,
+            categoria: document.getElementById('categoria').value,
+            luogo: document.getElementById('luogo').value,
+            data_evento: document.getElementById('data_evento').value,
+            descrizione: document.getElementById('descrizione').value
+        };
+
+        if (tipo === 'ritrovato') {
+            payloadData.domanda_verifica = domandaInput.value;
+        }
+
+        const messaggioDiv = document.getElementById('messaggio');
+
+        try {
+            const response = await fetch('/api/segnalazioni', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payloadData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                messaggioDiv.className = "mt-4 text-center font-bold text-sm text-green-600";
+                messaggioDiv.innerText = "Segnalazione salvata con successo! Torno alla bacheca...";
+                setTimeout(() => { window.location.href = '/dashboard.html'; }, 2000);
+            } else {
+                messaggioDiv.className = "mt-4 text-center font-bold text-sm text-red-600";
+                messaggioDiv.innerText = data.errore || "Errore durante il salvataggio";
+            }
+        } catch (error) {
+            messaggioDiv.className = "mt-4 text-center font-bold text-sm text-red-600";
+            messaggioDiv.innerText = "Errore di connessione al server";
+        }
+    });
+</script>
+</body>
+</html>

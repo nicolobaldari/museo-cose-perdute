@@ -1,0 +1,111 @@
+<!--
+Questa è la landing page pubblica dell'applicazione "Il Museo delle Cose Perdute".
+Presenta il progetto e gestisce dinamicamente la barra di navigazione,
+mostrando i pulsanti di login/registrazione o un saluto se l'utente ha già effettuato l'accesso.
+-->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Museo delle Cose Perdute</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .img-mask-animata {
+            -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, black 40%, transparent 100%);
+            mask-image: radial-gradient(50% 50% at 50% 50%, black 40%, transparent 100%);
+            animation: float-large 8s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            .img-mask-animata {
+                -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 50%, transparent 90%);
+                mask-image: radial-gradient(ellipse at 50% 50%, black 50%, transparent 90%);
+            }
+        }
+
+        @keyframes float-large {
+            0% { transform: translateY(0px) scale(1.15); }
+            50% { transform: translateY(-15px) scale(1.18); }
+            100% { transform: translateY(0px) scale(1.15); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen overflow-x-hidden">
+
+<header class="bg-white px-6 md:px-[5%] py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 w-full">
+    <a href="/" class="text-xl font-black text-slate-800 tracking-tight">Il Museo delle Cose Perdute</a>
+    <!-- Header di navigazione: il contenuto di questo contenitore cambia dinamicamente tramite JS in base allo stato di autenticazione -->
+    <nav class="flex items-center gap-4" id="navContainer">
+        <a href="/login.html" class="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">Accedi</a>
+        <a href="/register.html" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-600 hover:text-white transition-all">Registrati</a>
+    </nav>
+</header>
+
+<!-- Sezione "Hero" (principale) con il messaggio di benvenuto e la call to action che reindirizza alla bacheca -->
+<main class="flex-1 flex flex-col md:flex-row items-center relative w-full">
+
+    <div class="flex-1 px-6 py-10 md:pl-[10%] md:pr-[5%] flex flex-col justify-center items-center md:items-start text-center md:text-left relative z-10 w-full">
+
+        <span class="inline-block bg-yellow-100 text-orange-600 px-4 py-2 rounded-full text-sm font-bold mb-6 shadow-sm">
+            Se hai perso il telefono, speriamo tu stia leggendo da un computer
+        </span>
+
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 mb-6 leading-tight drop-shadow-sm">
+            Tutto si perde,<br> (Quasi) tutto si ritrova.
+        </h1>
+
+        <p class="text-lg text-gray-600 leading-relaxed mb-10 max-w-lg">
+            Hai smarrito qualcosa in aula studio, in biblioteca o tra le vie dell'università?
+            Oppure hai ritrovato un oggetto che appartiene a un altro studente?
+            Usa la bacheca digitale del Museo delle cose perse per segnalare ritrovamenti e recuperare ciò che hai perso.
+        </p>
+
+        <div class="flex gap-4 flex-wrap justify-center md:justify-start">
+            <a href="/dashboard.html" class="inline-flex justify-center items-center bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg shadow-md shadow-red-200 hover:-translate-y-0.5 transition-all">
+                Vai alla Bacheca
+            </a>
+        </div>
+    </div>
+
+    <!-- Contenitore dell'immagine illustrativa, che utilizza una maschera CSS animata definita nell'head -->
+    <div class="flex-[1.2] w-full flex justify-center md:justify-end items-center relative z-0 min-h-[50vh] md:min-h-[80vh]">
+        <img src="/images/foto_home.png" alt="Personaggio con la testa tra le nuvole" class="w-full h-full max-h-[90vh] object-cover img-mask-animata">
+    </div>
+</main>
+
+<footer class="bg-slate-800 text-slate-400 text-center py-5 text-sm relative z-50 w-full mt-auto">
+    &copy; 2026 Il Museo delle Cose Perdute. Se hai perso la <span class="text-red-500 font-bold">dignità</span>, purtroppo quella non te la possiamo restituire.
+</footer>
+
+<script>
+    // Al caricamento della pagina, verifica la presenza del token per mostrare il pulsante "Esci" invece di Login/Registrati
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem('token');
+        const navContainer = document.getElementById('navContainer');
+
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const nomeReale = payload.nome || "Utente";
+
+                navContainer.innerHTML = `
+                    <span class="text-sm font-bold text-slate-800 hidden sm:inline-block">Ciao, ${nomeReale}</span>
+                    <button id="logoutBtn" class="bg-transparent text-red-500 border border-red-500 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-50 transition-colors">Esci</button>
+                `;
+
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    localStorage.removeItem('token');
+                    window.location.reload();
+                });
+
+            } catch (error) {
+                console.error("Errore nella lettura del token", error);
+                localStorage.removeItem('token');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

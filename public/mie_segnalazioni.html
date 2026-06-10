@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo delle Cose Perdute - Le Mie Segnalazioni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-sans text-gray-800">
+
+<header class="bg-white px-[5%] py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 w-full">
+    <a href="/" class="text-xl font-black text-slate-800 tracking-tight">Il Museo delle Cose Perdute</a>
+    <nav class="flex items-center gap-5">
+        <span id="nomeUtenteHeader" class="hidden sm:inline-block bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-bold border border-blue-100"></span>
+        <a href="/dashboard.html" class="text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">Bacheca</a>
+        <a href="/mie_segnalazioni.html" id="btnLeMieSegnalazioni" class="text-sm font-semibold text-blue-600 transition-colors">Le Mie Segnalazioni</a>
+        <button id="logoutBtn" class="bg-transparent text-gray-500 border border-gray-300 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-500 transition-all">Esci</button>
+    </nav>
+</header>
+
+<main class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-slate-800">Le Mie Segnalazioni</h1>
+        <p class="text-gray-600 mt-2">Riepilogo dei tuoi oggetti e dei messaggi ricevuti dagli altri utenti.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="mieiOggettiContainer"></div>
+</main>
+
+<div id="modalConferma" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm text-center">
+        <h3 class="text-xl font-bold mb-4">Sei sicuro?</h3>
+        <p id="modalTesto" class="text-gray-600 mb-6"></p>
+        <div class="flex gap-3">
+            <button onclick="chiudiModalEliminazione()" class="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-lg font-bold transition-colors">Annulla</button>
+            <button id="btnConferma" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-bold transition-colors">Conferma</button>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-slate-800 text-slate-400 text-center py-4 text-sm w-full mt-auto">
+    &copy; 2026 Il Museo delle Cose Perdute. Se hai perso la <span class="text-red-500 font-bold">dignità</span>, purtroppo quella non te la possiamo restituire.
+</footer>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; }
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('nomeUtenteHeader').innerText = `Ciao, ${payload.nome || "Utente"}`;
+    } catch(e) { console.error("Errore token"); }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
+    });
+
+    function chiudiModalEliminazione() { document.getElementById('modalConferma').classList.add('hidden'); }
+
+    // Apre la modale per confermare l'eliminazione
+    async function eliminaOggetto(id, tipo) {
+        const modal = document.getElementById('modalConferma');
+        const modalTesto = document.getElementById('modalTesto');
+        const btnConferma = document.getElementById('btnConferma');
+
+        modalTesto.innerText = tipo === 'smarrito'
+            ? "Che c...fortuna! Sei stato fortunato a ritrovarlo. Vuoi chiudere l'annuncio?"
+            : "Che Dio ti benedica per il tuo gesto. Vuoi rimuovere l'annuncio?";
+
+        modal.classList.remove('hidden');
+
+        btnConferma.onclick = async () => {
+            try {
+                const res = await fetch(`/api/segnalazioni/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    chiudiModalEliminazione();
+                    caricaMieiOggetti();
+                } else { alert("Errore durante l'eliminazione"); }
+            } catch (err) { console.error(err); }
+        };
+    }
+
+    // Carica tutti gli oggetti dell'utente e per ognuno verifica se ci sono messaggi, proposte o suggerimenti
+    async function caricaMieiOggetti() {
+        const container = document.getElementById('mieiOggettiContainer');
+        if (container.innerHTML.trim() === '') {
+            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Caricamento in corso...</p>';
+        }
+
+        try {
+            const response = await fetch('/api/segnalazioni/utente/mie', { headers: { 'Authorization': `Bearer ${token}` } });
+            const oggetti = await response.json();
+
+            if (oggetti.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center p-10 bg-white rounded-xl border border-gray-100 shadow-sm text-gray-500 italic">Non hai ancora inserito nessuna segnalazione.</div>';
+                return;
+            }
+
+            const tempContainer = document.createElement('div');
+
+            oggetti.forEach(oggetto => {
+                const card = document.createElement('div');
+
+                let cardClasses = 'bg-white rounded-xl shadow-sm border overflow-hidden relative flex flex-col hover:shadow-md transition-all duration-200 ';
+                cardClasses += oggetto.stato === 'risolta' ? 'border-green-400 ring-2 ring-green-50' : 'border-gray-100';
+                card.className = cardClasses;
+
+                const badgeTipoClass = oggetto.tipo === 'smarrito' ? 'bg-red-500' : 'bg-green-500';
+                const statoColor = oggetto.stato === 'risolta' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+
+                let boxMatchRisolto = '';
+                if (oggetto.stato === 'risolta') {
+                    boxMatchRisolto = `
+                        <div class="mt-4 bg-green-50 border border-green-200 p-3 rounded-lg text-center shadow-sm">
+                            <p class="text-xs font-black text-green-700 uppercase tracking-wide">Match Completato!</p>
+                            <p class="text-[10px] text-green-600 mt-1 font-semibold">Usa i contatti per accordarti per la restituzione.</p>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <span class="absolute top-4 right-4 px-3 py-1 rounded-full text-white text-xs font-extrabold uppercase shadow-sm ${badgeTipoClass}">${oggetto.tipo}</span>
+                    <div class="p-6 flex flex-col flex-1">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2 truncate pr-20">${oggetto.titolo}</h4>
+                        <p class="text-xs font-bold uppercase mb-4"><span class="px-2 py-1 rounded-full ${statoColor}">${oggetto.stato.replace('_', ' ')}</span></p>
+                        <p class="text-sm text-gray-600 my-1"><strong>Luogo:</strong> ${oggetto.luogo}</p>
+                        <p class="text-sm text-gray-500 italic mt-2">${oggetto.descrizione.substring(0, 50)}...</p>
+
+                        <div id="messaggi-${oggetto.id}" class="mt-4 pt-4 border-t border-gray-100 hidden">
+                            <h5 class="text-xs font-bold text-purple-600 uppercase tracking-wider mb-2">Messaggi Ricevuti:</h5>
+                            <div class="space-y-2" id="lista-messaggi-${oggetto.id}"></div>
+                        </div>
+
+                        <div id="suggerimenti-${oggetto.id}" class="mt-4 pt-4 border-t border-gray-100 hidden">
+                            <h5 class="text-xs font-bold text-green-600 uppercase tracking-wider mb-2">Match Suggeriti dal Sistema:</h5>
+                            <div class="space-y-2" id="lista-suggerimenti-${oggetto.id}"></div>
+                        </div>
+
+                        <div id="proposte-${oggetto.id}" class="mt-4 pt-4 border-t border-gray-100 hidden">
+                            <h5 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">Richieste di Restituzione:</h5>
+                            <div class="space-y-2" id="lista-proposte-${oggetto.id}"></div>
+                        </div>
+
+                        ${boxMatchRisolto}
+
+                        <div class="flex gap-2 mt-auto pt-6">
+                            <a href="/dettaglio_oggetto.html?id=${oggetto.id}" class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg text-sm font-bold transition-all">Vedi Dettagli</a>
+                            <button onclick="eliminaOggetto(${oggetto.id}, '${oggetto.tipo}')" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 font-bold py-2.5 rounded-lg text-sm transition-all border border-red-200">Rimuovi</button>
+                        </div>
+                    </div>
+                `;
+                tempContainer.appendChild(card);
+
+                // Carica sempre i messaggi
+                caricaMessaggiRicevuti(oggetto.id, tempContainer);
+
+                // Carica le logiche di match in base al tipo di oggetto e allo stato
+                if (oggetto.tipo === 'smarrito' && oggetto.stato === 'aperta') {
+                    caricaSuggerimentiMatch(oggetto.id, tempContainer);
+                } else if (oggetto.tipo === 'ritrovato' && (oggetto.stato === 'aperta' || oggetto.stato === 'in_verifica')) {
+                    caricaProposteRicevute(oggetto.id, tempContainer);
+                }
+            });
+
+            container.innerHTML = tempContainer.innerHTML;
+
+        } catch (error) {
+            container.innerHTML = '<p class="text-red-500 text-center col-span-full font-bold">Errore di connessione.</p>';
+        }
+    }
+
+    // Effettua la chimata API per i messaggi diretti inviati dagli utenti
+    async function caricaMessaggiRicevuti(idOggetto, contextNode) {
+        try {
+            const res = await fetch(`/api/messaggi/ricevuti/${idOggetto}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const messaggi = await res.json();
+
+            if (res.ok && messaggi.length > 0) {
+                contextNode.querySelector(`#messaggi-${idOggetto}`).classList.remove('hidden');
+                const lista = contextNode.querySelector(`#lista-messaggi-${idOggetto}`);
+
+                messaggi.forEach(msg => {
+                    const item = document.createElement('div');
+                    item.className = 'bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs shadow-sm';
+                    item.innerHTML = `
+                        <div class="mb-1">
+                            <span class="font-bold text-slate-800">Da: ${msg.Mittente?.email || 'Utente'}</span>
+                            <span class="text-gray-500 text-[10px] ml-2">${new Date(msg.createdAt).toLocaleDateString('it-IT')}</span>
+                        </div>
+                        <p class="text-gray-700 italic">"${msg.contenuto}"</p>
+                    `;
+                    lista.appendChild(item);
+                });
+            }
+        } catch (err) { console.error("Errore messaggi", err); }
+    }
+
+    async function caricaSuggerimentiMatch(idSmarrito, contextNode) {
+        try {
+            const res = await fetch(`/api/match/suggerimenti/${idSmarrito}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const suggeriti = await res.json();
+
+            if (res.ok && suggeriti.length > 0) {
+                contextNode.querySelector(`#suggerimenti-${idSmarrito}`).classList.remove('hidden');
+                const lista = contextNode.querySelector(`#lista-suggerimenti-${idSmarrito}`);
+                lista.innerHTML = '';
+
+                suggeriti.forEach(sug => {
+                    const item = document.createElement('div');
+                    item.className = 'flex justify-between items-center bg-green-50 p-2.5 rounded-lg border border-green-100 text-xs';
+                    item.innerHTML = `
+                        <div class="truncate pr-2">
+                            <span class="font-bold text-slate-800">${sug.titolo}</span>
+                            <span class="block text-gray-500 truncate">Trovato a: ${sug.luogo}</span>
+                        </div>
+                        <a href="/dettaglio_oggetto.html?id=${sug.id}&id_smarrito=${idSmarrito}" class="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded transition-colors whitespace-nowrap">Reclama</a>
+                    `;
+                    lista.appendChild(item);
+                });
+            }
+        } catch (err) {}
+    }
+
+    async function caricaProposteRicevute(idRitrovato, contextNode) {
+        try {
+            const res = await fetch(`/api/match/ricevute/${idRitrovato}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const proposte = await res.json();
+            const inAttesa = proposte.filter(p => p.stato === 'in_attesa');
+
+            if (res.ok && inAttesa.length > 0) {
+                contextNode.querySelector(`#proposte-${idRitrovato}`).classList.remove('hidden');
+                const lista = contextNode.querySelector(`#lista-proposte-${idRitrovato}`);
+                lista.innerHTML = '';
+
+                inAttesa.forEach(prop => {
+                    const item = document.createElement('div');
+                    item.className = 'bg-blue-50 p-3 rounded-lg border border-blue-100 text-xs shadow-sm';
+                    item.innerHTML = `
+                        <div class="mb-2">
+                            <span class="font-bold text-slate-800">Da: ${prop.Proponente?.nome || prop.Proponente?.email}</span>
+                            <span class="block text-gray-700 bg-white p-1.5 rounded border border-blue-100 mt-1 italic">Risposta: "${prop.risposta_utente}"</span>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="gestisciMatchInline(${prop.id}, 'approvato')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-1.5 rounded transition-colors shadow-sm">Accetta</button>
+                            <button onclick="gestisciMatchInline(${prop.id}, 'rifiutato')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-1.5 rounded transition-colors shadow-sm">Rifiuta</button>
+                        </div>
+                    `;
+                    lista.appendChild(item);
+                });
+            }
+        } catch (err) {}
+    }
+
+    async function gestisciMatchInline(matchId, nuovoStato) {
+        const modal = document.getElementById('modalConferma');
+        const modalTesto = document.getElementById('modalTesto');
+        const btnConferma = document.getElementById('btnConferma');
+
+        const azione = nuovoStato === 'approvato' ? 'accettare' : 'rifiutare';
+        modalTesto.innerText = `Sei sicuro di voler ${azione} questa richiesta?`;
+        modal.classList.remove('hidden');
+
+        btnConferma.onclick = async () => {
+            chiudiModalEliminazione();
+            try {
+                const res = await fetch(`/api/match/${matchId}/stato`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ nuovoStato })
+                });
+
+                if(res.ok) {
+                    alert(nuovoStato === 'approvato' ? "Hai approvato la richiesta!" : "Richiesta rifiutata.");
+                    caricaMieiOggetti();
+                } else {
+                    alert("Errore nell'aggiornamento.");
+                }
+            } catch (err) { console.error(err); }
+        };
+    }
+
+    // Inizializza la pagina
+    caricaMieiOggetti();
+
+    // Polling a 10 secondi per i nuovi messaggi/match
+    setInterval(() => {
+        caricaMieiOggetti();
+    }, 10000);
+</script>
+</body>
+</html>
