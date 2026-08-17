@@ -170,7 +170,7 @@
         }
     }
 
-    // Effettua la chimata API per i messaggi diretti inviati dagli utenti
+    // Effettua la chiamata API per i messaggi diretti inviati dagli utenti
     async function caricaMessaggiRicevuti(idOggetto, contextNode) {
         try {
             const res = await fetch(`/api/messaggi/ricevuti/${idOggetto}`, { headers: { 'Authorization': `Bearer ${token}` } });

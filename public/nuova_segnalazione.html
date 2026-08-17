@@ -119,7 +119,7 @@
     document.getElementById('segnalazioneForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Inviamo i dati come normale oggetto JSON invece di FormData
+        // I dati vengono inviati come oggetto JSON anziché come FormData
         const payloadData = {
             tipo: tipo,
             titolo: document.getElementById('titolo').value,
