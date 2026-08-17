@@ -3,8 +3,7 @@
 ## 1. Introduzione e Obiettivi del Progetto
 Il Museo delle Cose Perdute è una piattaforma web pensata per la gestione e il ritrovamento di oggetti smarriti e ritrovati all'interno di un ambiente "chiuso", come un campus universitario come l'ELIS. L'applicazione introduce dinamiche di interazione protetta e flussi di approvazione vincolati, garantendo la sicurezza e la privacy degli utenti nelle fasi di rivendicazione e restituzione dei beni.
 
-Il progetto è stato sviluppato coprendo integralmente i requisiti funzionali previsti dai Livelli 1 e 2, con l'aggiunta di estensioni avanzate tipiche del Livello 3, come un algoritmo di matching automatico predittivo e un sistema di messaggistica interna a mo' di bacheca.
-
+Il progetto copre l'intero ciclo di vita di una segnalazione, dalla pubblicazione alla risoluzione, con funzionalità avanzate come un algoritmo di matching automatico predittivo e un sistema di messaggistica interna a mo' di bacheca.
 ---
 
 ## 2. Architettura del Sistema
@@ -64,7 +63,7 @@ Una volta che una coppia di oggetti è associata a un match in stato `approvato`
 * `POST /login`: Riceve `email`, `password`. Verifica le credenziali e restituisce un JSON contenente il token JWT.
 
 ### Segnalazioni (`/api/segnalazioni`)
-* `POST /` *(Prototta)*: Riceve i dati dell'annuncio. Gestisce condizionalmente il campo `domanda_verifica` azzerandolo se l'oggetto è smarrito.
+* `POST /` *(Protetta)*: Riceve i dati dell'annuncio. Gestisce condizionalmente il campo `domanda_verifica` azzerandolo se l'oggetto è smarrito.
 * `GET /`: Restituisce l'elenco pubblico delle segnalazioni ordinate in modo decrescente per data di inserimento. Accetta query parameters opzionali (`tipo`, `categoria`, `luogo`) per filtrare i risultati.
 * `GET /utente/mie` *(Protetta)*: Restituisce esclusivamente gli annunci creati dall'utente autenticato.
 * `GET /:id` *(Protetta)*: Restituisce l'oggetto comprensivo di flag booleani calcolati sul momento, indicando se l'annuncio appartiene all'utente loggato (`isMio`) e se è già stata sottomessa una proposta di match (`haRichiestoMatch`).
