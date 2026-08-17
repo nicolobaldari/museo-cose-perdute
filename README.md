@@ -1,9 +1,10 @@
 # Il Museo delle Cose Perdute - Documentazione di Progetto
 
 ## 1. Introduzione e Obiettivi del Progetto
-Il Museo delle Cose Perdute è una piattaforma web pensata per la gestione e il ritrovamento di oggetti smarriti e ritrovati all'interno di un ambiente "chiuso", come un campus universitario come l'ELIS. L'applicazione introduce dinamiche di interazione protetta e flussi di approvazione vincolati, garantendo la sicurezza e la privacy degli utenti nelle fasi di rivendicazione e restituzione dei beni.
+Il Museo delle Cose Perdute è una piattaforma web pensata per la gestione e il ritrovamento di oggetti smarriti e ritrovati all'interno di un ambiente "chiuso", come un campus universitario o aziendale. L'applicazione introduce dinamiche di interazione protetta e flussi di approvazione vincolati, garantendo la sicurezza e la privacy degli utenti nelle fasi di rivendicazione e restituzione dei beni.
 
 Il progetto copre l'intero ciclo di vita di una segnalazione, dalla pubblicazione alla risoluzione, con funzionalità avanzate come un algoritmo di matching automatico predittivo e un sistema di messaggistica interna a mo' di bacheca.
+
 ---
 
 ## 2. Architettura del Sistema
@@ -87,5 +88,32 @@ Una volta che una coppia di oggetti è associata a un match in stato `approvato`
 
 ### Installazione delle Dipendenze
 All'interno della radice del progetto, installare i pacchetti specificati nel `package.json` digitando:
+
 ```bash
 npm install
+```
+
+### Configurazione delle Variabili d'Ambiente
+Il progetto richiede alcune variabili d'ambiente per connettersi al database. Copia il file `.env.example` in un nuovo file chiamato `.env` nella radice del progetto:
+
+```bash
+cp .env.example .env
+```
+
+Apri `.env` e inserisci i tuoi valori reali (nome del database, utente, password e host di MySQL):
+
+```
+DB_NAME=nome_del_tuo_database
+DB_USER=tuo_utente
+DB_PASS=tua_password
+DB_HOST=localhost
+```
+
+### Avvio dell'Applicazione
+Una volta installate le dipendenze e configurato il file `.env`, avvia il server con:
+
+```bash
+node index.js
+```
+
+L'applicazione sarà disponibile all'indirizzo `http://localhost:3000` (o sulla porta configurata nel progetto).git add README.md
